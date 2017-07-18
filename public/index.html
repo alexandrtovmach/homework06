@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tovmach Alexandr homework#6</title>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <script src="js/general.js"></script>
+    <script src="js/chat.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="init()">
+<h1>chatroom <span>BSA17</span><span>JS-06</span></h1>
+<ul id="userList"></ul>
+<div class="centerContent wrap field">
+    <ul id="chatField"></ul>
+    <form id="authForm" class="hidden centerContent">
+        <label>@nickname:
+            <input type="text" id="userNick" class="field" placeholder="chez1976" required>
+        </label>
+        <label>Full name:
+            <input type="text" id="userName" class="field" placeholder="Chester Bennington">
+        </label>
+        <input type="submit" class="button" value="create user">
+    </form>
+    <form id="chat" class="hidden">
+        <input type="text" id="textMessage" class="field" placeholder="message..." required>
+        <input type="submit" class="button" value="send">
+    </form>
+</div>
+</body>
+</html>
