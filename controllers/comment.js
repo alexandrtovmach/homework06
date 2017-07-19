@@ -1,13 +1,15 @@
 var Comment = require('../services/comment');
+var io = require('../index.js');
 
 
-exports.showAllComments = function (req, res) {
-	Comment.showAllComments(+req.params.cach, function (err, docs) {
+exports.showAllComments = function (count) {
+	console.log(count);
+	Comment.showAllComments(count, function (err, docs) {
 		if (err) {
 			console.log(err);
 			return res.sendStatus(500);
 		}
-		res.send(docs);
+        io.emit('take new messages', docs);
 	})
 };
 //
@@ -29,7 +31,7 @@ exports.createComment = function (req, res) {
         textMessage: req.body.textMessage,
 		dateOfPost: Date.now()
 	};
-	Comment.createComment(comment, function (err, docs) {
+	Comment.createComment(comment, function (err) {
 		if (err) {
 			console.log(err);
 			return res.sendStatus(500);

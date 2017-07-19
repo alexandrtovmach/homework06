@@ -1,17 +1,18 @@
-/**
- * Created by Alexandr on 18.07.2017.
- */
+// /**
+//  * Created by Alexandr on 18.07.2017.
+//  */
 var arrNick = [];
-
+var socket;
 function init() {
+    socket = io.connect();
     chat.onsubmit = function (event) {
         event.preventDefault();
         sendMessage()
     };
     if (localStorage.length) {
         chat.classList.remove('hidden');
-        getAllReservedNicks()
-        chatPool();
+        //getAllReservedNicks();
+        chatSocket();
     } else {
         showForm();
     }
@@ -21,26 +22,23 @@ function showForm() {
     authForm.onsubmit = function (event) {
         event.preventDefault();
         if (checkUniqueNick(userNick.value)) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('post', '/user/create');
-            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-            xhr.send(JSON.stringify({
+            var user = {
                 userNick: userNick.value,
                 userName: userName.value
-            }));
-
-            xhr.onload = function () {
+            };
+            socket.emit('new user', user);
+            socket.on('new user', function () {
                 localStorage.setItem('userNick', userNick.value);
                 localStorage.setItem('userName', userName.value);
                 authForm.classList.add('hidden');
                 chat.classList.remove('hidden');
-                chatPool();
-            }
+                chatSocket();
+            })
         } else {
             alert('This nickname is reserved by another user')
         }
     };
-    getAllReservedNicks();
+    //getAllReservedNicks();
     authForm.classList.remove('hidden');
 }
 
