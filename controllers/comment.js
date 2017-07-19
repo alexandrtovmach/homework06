@@ -27,3 +27,12 @@ exports.createComment = function (req, res) {
 		res.send(comment);
 	})
 };
+
+exports.cleanUp = function (req, res) {
+    Comment.cleanUp(function (err) {
+        if (err) {
+            return res.sendStatus(500);
+        }
+        res.sendStatus(200);
+    })
+};

@@ -13,3 +13,9 @@ exports.addOneComment = function (comment, callback) {
         callback(err, docs)
     })
 };
+
+exports.dropDatabase = function (callback) {
+    db.get().dropDatabase(function (err, docs) {
+        callback(err, docs)
+    })
+};

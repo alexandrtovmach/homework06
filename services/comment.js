@@ -10,7 +10,11 @@ exports.createComment = function (comment, callback) {
         callback(err, docs)
     })
 };
-
+exports.cleanUp = function (callback) {
+    dbBridge.dropDatabase(function (err, docs) {
+        callback(err, docs)
+    })
+};
 
 
 

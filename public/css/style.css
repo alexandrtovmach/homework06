@@ -70,7 +70,6 @@ h1 span:last-child {
     height: 50vh;
     margin: 100px auto;
     padding: 50px;
-    flex-direction: column;
     background-color: deepskyblue;
 }
 .hidden {
@@ -99,9 +98,6 @@ h1 span:last-child {
     font-size: 50%;
 }
 #userList {
-    position: absolute;
-    top: 140px;
-    left: 50px;
 }
 .my {
     color: deepskyblue;

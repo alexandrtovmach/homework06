@@ -3,6 +3,18 @@
  */
 var arrNick = [];
 function init() {
+    cleanUp.onclick = function () {
+        if (!confirm('You really wanna clean up all users and messages?')) {return}
+        localStorage.clear();
+        var xhr = new XMLHttpRequest();
+        xhr.open('get', '/cleanup');
+        xhr.send();
+        xhr.onload = function () {
+            alert('All data is removed');
+            location.reload();
+        }
+    };
+
     chat.onsubmit = function (event) {
         event.preventDefault();
         sendMessage()

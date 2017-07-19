@@ -14,8 +14,11 @@
 </head>
 <body onload="init()">
 <h1>chatroom <span>BSA17</span><span>JS-06</span></h1>
-<ul id="userList"></ul>
+<input type="button" id="cleanUp" class="button" value="Clean Up">
+
 <div class="centerContent wrap field">
+    <ul id="userList"></ul>
+    <div>
     <ul id="chatField"></ul>
     <form id="authForm" class="hidden centerContent">
         <label>@nickname:
@@ -30,6 +33,7 @@
         <input type="text" id="textMessage" class="field" placeholder="message..." required>
         <input type="submit" class="button" value="send">
     </form>
+    </div>
 </div>
 </body>
 </html>

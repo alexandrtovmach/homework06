@@ -22,7 +22,7 @@ app.get('/user:cach', userControl.getAllUser)
 
 app.post('/user/create', userControl.createUser)
 
-
+app.get('/cleanup', chatControl.cleanUp);
 
 // //chat.js operations
 app.get('/chat:cach', chatControl.showAllComments);
