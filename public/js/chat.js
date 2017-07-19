@@ -1,17 +1,6 @@
 // /**
 //  * Created by Alexandr on 18.07.2017.
 //  */
-
-function sendMessage() {
-    var message = {
-        userNick: localStorage.getItem('userNick'),
-        userName: localStorage.getItem('userName'),
-        reciverNick: parseMessage(true),
-        textMessage: parseMessage()
-    };
-    socket.emit('send new message', message);
-}
-
 function parseMessage(reciver) {
     var res;
     if (reciver) {
@@ -23,10 +12,10 @@ function parseMessage(reciver) {
 }
 
 function chatSocket() {
-    socket.emit('check new message', chatField.children.length);
+    socket.emit('check new message');
     socket.on('take new messages', function (message) {
-        console.log(message)
         if (message.length) {
+            textMessage.value = null;
             message.forEach(function (elem) {
                 var li = document.createElement('li'),
                     span = document.createElement('span');

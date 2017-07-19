@@ -5,49 +5,71 @@ var arrNick = [];
 var socket;
 function init() {
     socket = io.connect();
+    cleanUp.onclick = function () {
+        if (!confirm('You really wanna clean up all users and messages?')) {return}
+        localStorage.clear();
+        var xhr = new XMLHttpRequest();
+        xhr.open('get', '/cleanup');
+        xhr.send();
+        xhr.onload = function () {
+            alert('All data is removed');
+            location.reload();
+        }
+    };
+
+
     chat.onsubmit = function (event) {
         event.preventDefault();
-        sendMessage()
+        var message = {
+            userNick: localStorage.getItem('userNick'),
+            userName: localStorage.getItem('userName'),
+            reciverNick: parseMessage(true),
+            textMessage: parseMessage()
+        };
+        socket.emit('send new message', message);
     };
     if (localStorage.length) {
         chat.classList.remove('hidden');
         getAllReservedNicks();
         chatSocket();
     } else {
-        showForm();
+        authForm.onsubmit = function (event) {
+            event.preventDefault();
+            if (checkUniqueNick(userNick.value)) {
+                var user = {
+                    userNick: userNick.value,
+                    userName: userName.value
+                };
+                socket.emit('new user', user);
+                socket.on('new user', function (nicks) {
+                    localStorage.setItem('userNick', userNick.value);
+                    localStorage.setItem('userName', userName.value);
+                    authForm.classList.add('hidden');
+                    chat.classList.remove('hidden');
+                    nicks.forEach(function (elem){
+                        var li = document.createElement('li');
+                        li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
+                        li.innerHTML = elem.userNick;
+                        userList.appendChild(li);
+                    });
+                    //getAllReservedNicks();
+                    chatSocket();
+                })
+            } else {
+                alert('This nickname is reserved by another user')
+            }
+        };
+        getAllReservedNicks();
+        authForm.classList.remove('hidden');
     }
 }
 
-function showForm() {
-    authForm.onsubmit = function (event) {
-        event.preventDefault();
-        if (checkUniqueNick(userNick.value)) {
-            var user = {
-                userNick: userNick.value,
-                userName: userName.value
-            };
-            socket.emit('new user', user);
-            socket.on('new user', function () {
-                localStorage.setItem('userNick', userNick.value);
-                localStorage.setItem('userName', userName.value);
-                authForm.classList.add('hidden');
-                chat.classList.remove('hidden');
-                chatSocket();
-            })
-        } else {
-            alert('This nickname is reserved by another user')
-        }
-    };
-    getAllReservedNicks();
-    authForm.classList.remove('hidden');
-}
 
 
 function getAllReservedNicks() {
-    socket.emit('getAllUserReservedNicks', userList.children.length);
+    socket.emit('getAllUserReservedNicks');
     socket.on('reservedNicks', function (nicks) {
-        arrNick = nicks;
-        arrNick.forEach(function (elem){
+        nicks.forEach(function (elem){
             var li = document.createElement('li');
             li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
             li.innerHTML = elem.userNick;

@@ -8,46 +8,45 @@ const userControl = require('./controllers/user');
 
 app.use('/', express.static(__dirname + '/public'));
 
+app.get('/cleanup', chatControl.cleanUp);
+
 io.on('connection', function (socket) {
     console.log('+1 connect');
-    socket.on('check new message', function (count) {
-        console.log('sync');
-    	chatControl.showAllComments(count, function (err, docs) {
+    socket.on('check new message', function () {
+    	chatControl.showAllComments(function (err, docs) {
             if (err) {
                 console.log(err);
             }
-            io.emit('take new messages', docs);
+			socket.emit('take new messages', docs);
         })
     });
 
     socket.on('send new message', function (message) {
-        console.log('post');
 		message.dateOfPost = Date.now();
         chatControl.createComment(message, function (err, docs) {
             if (err) {
                 console.log(err);
             }
-            io.emit('take new messages', docs.ops);
+            socket.emit('take new messages', docs.ops);
+            socket.broadcast.emit('take new messages', docs.ops);
         })
     });
 
-    socket.on('getAllUserReservedNicks', function (count) {
-        console.log('getNicks');
-        userControl.getAllUser(count, function (err, docs) {
+    socket.on('getAllUserReservedNicks', function () {
+        userControl.getAllUser(function (err, docs) {
             if (err) {
                 console.log(err);
             }
-            io.emit('reservedNicks', docs);
+            socket.emit('reservedNicks', docs);
         })
     });
     socket.on('new user', function (user) {
-        console.log('new user');
         userControl.createUser(user, function (err, docs) {
             if (err) {
                 console.log(err);
             }
-            io.emit('reservedNicks', docs.ops);
-            io.emit('new user');
+            socket.emit('new user', docs.ops);
+            socket.broadcast.emit('reservedNicks', docs.ops);
         })
     });
 });
@@ -55,7 +54,7 @@ io.on('connection', function (socket) {
 
 
 //connecting to mongodb
-db.connect('mongodb://localhost:27017/ajax', function (err) {
+db.connect('mongodb://localhost:27017/socket', function (err) {
 	if (err) {
 		return console.log(err);
 	}

@@ -4,9 +4,8 @@
 var db = require('../db');
 //
 // //users actions in db
-exports.findAllUsers = function (cache, callback) {
+exports.findAllUsers = function (callback) {
     db.get().collection('users').find().toArray(function (err, docs) {
-        docs = docs.splice(cache, docs.length);
         callback(err, docs)
     })
 };
