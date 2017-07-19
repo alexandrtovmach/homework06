@@ -19,30 +19,14 @@ app.all('*', function (req, res ,next) {
 });
 ////user operations
 app.get('/user:cach', userControl.getAllUser)
-//
-//app.get('/users/:id', userControl.getUserById)
-//
+
 app.post('/user/create', userControl.createUser)
-//
-//app.put('/users/:id', userControl.updateUser)
-//
-//app.delete('/users/:id', userControl.deleteUser)
-//
 
 
 
 // //chat.js operations
 app.get('/chat:cach', chatControl.showAllComments);
-//
-// app.get('/chat/:dateOfPost', chatControl.showOneComment)
-//
-app.post('/chat', chatControl.createComment);
-//
-// app.put('/chat/:dateOfPost', chatControl.editComment)
-//
-// app.delete('/chat/:dateOfPost', chatControl.deleteComment)
-//
-// app.get('/chat/contacts/:id', chatControl.showReciversById)
 
+app.post('/chat', chatControl.createComment);
 
 module.exports = app;
