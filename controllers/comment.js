@@ -1,17 +1,7 @@
 var Comment = require('../services/comment');
-var io = require('../index.js');
 
 
-exports.showAllComments = function (count) {
-	console.log(count);
-	Comment.showAllComments(count, function (err, docs) {
-		if (err) {
-			console.log(err);
-			return res.sendStatus(500);
-		}
-        io.emit('take new messages', docs);
-	})
-};
+exports.showAllComments = Comment.showAllComments;
 //
 // exports.showOneComment = function (req, res) {
 //     Comment.showOneComment(+req.params.dateOfPost, function (err, docs) {
@@ -23,22 +13,7 @@ exports.showAllComments = function (count) {
 //     })
 // };
 
-exports.createComment = function (req, res) {
-	var comment = {
-        userNick: req.body.userNick,
-        userName: req.body.userName,
-        reciverNick: req.body.reciverNick,
-        textMessage: req.body.textMessage,
-		dateOfPost: Date.now()
-	};
-	Comment.createComment(comment, function (err) {
-		if (err) {
-			console.log(err);
-			return res.sendStatus(500);
-		}
-		res.send(comment);
-	})
-};
+exports.createComment = Comment.createComment;
 //
 // exports.editComment = function (req, res) {
 // 	var editedComment = {

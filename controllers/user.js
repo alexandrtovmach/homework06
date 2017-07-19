@@ -1,15 +1,7 @@
 var User = require('../services/user');
 //
 //
-exports.getAllUser = function (req, res) {
-	User.getAllUser(+req.params.cach, function (err, docs) {
-		if (err) {
-			console.log(err);
-			return res.sendStatus(500);
-		}
-		res.send(docs);
-	})
-};
+exports.getAllUser = User.getAllUser;
 //
 // exports.getUserById = function (req, res) {
 // 	User.getUserById(+req.params.id, function (err, docs) {
@@ -21,19 +13,7 @@ exports.getAllUser = function (req, res) {
 // 	})
 // }
 //
-exports.createUser = function (req, res) {
-	var user = {
-        userNick: req.body.userNick,
-        userName: req.body.userName
-	};
-	User.createUser(user, function (err) {
-		if (err) {
-			console.log(err);
-			return res.sendStatus(500);
-		}
-		res.sendStatus(200);
-	})
-};
+exports.createUser = User.createUser;
 //
 // exports.updateUser = function (req, res) {
 // 	var newUser = {

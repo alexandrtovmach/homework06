@@ -23,16 +23,24 @@ function parseMessage(reciver) {
 }
 
 function chatSocket() {
-    socket.emit('chat message', chatField.children.length);
+    socket.emit('check new message', chatField.children.length);
     socket.on('take new messages', function (message) {
+        console.log(message)
         if (message.length) {
             message.forEach(function (elem) {
                 var li = document.createElement('li'),
                     span = document.createElement('span');
                 li.className = (elem.userNick == localStorage.getItem('userNick')) ? 'my' : 'other';
-                var reciverClass = (elem.reciverNick == localStorage.getItem('userNick')) ? 'iReciver' : 'allReciver';
-                li.classList.add(reciverClass);
-                span.innerHTML = elem.userNick;
+                if (elem.reciverNick === localStorage.getItem('userNick')) {
+                    span.style.color = 'gold';
+                    li.style.color = 'gold';
+                    li.style.backgroundColor = 'midnightblue';
+                    span.innerHTML = elem.userNick + ' for @' + elem.reciverNick;
+                } else if (elem.reciverNick !== ''){
+                    span.innerHTML = elem.userNick + ' for @' + elem.reciverNick;
+                } else {
+                    span.innerHTML = elem.userNick;
+                }
                 li.appendChild(span);
                 li.innerHTML += elem.textMessage;
                 chatField.appendChild(li);
@@ -42,7 +50,7 @@ function chatSocket() {
                     clearTimeout(time);
                     return
                 }
-                chatField.scrollTop += 10;
+                chatField.scrollTop += ((chatField.scrollHeight - chatField.scrollTop)/50 + 1);
                 setTimeout(scrollTimer, 20)
             }, 1)
         }

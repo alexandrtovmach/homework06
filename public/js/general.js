@@ -11,7 +11,7 @@ function init() {
     };
     if (localStorage.length) {
         chat.classList.remove('hidden');
-        //getAllReservedNicks();
+        getAllReservedNicks();
         chatSocket();
     } else {
         showForm();
@@ -38,25 +38,22 @@ function showForm() {
             alert('This nickname is reserved by another user')
         }
     };
-    //getAllReservedNicks();
+    getAllReservedNicks();
     authForm.classList.remove('hidden');
 }
 
 
 function getAllReservedNicks() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('get', '/user' + userList.children.length);
-    xhr.send();
-    xhr.onload = function () {
-        arrNick = JSON.parse(xhr.responseText);
+    socket.emit('getAllUserReservedNicks', userList.children.length);
+    socket.on('reservedNicks', function (nicks) {
+        arrNick = nicks;
         arrNick.forEach(function (elem){
             var li = document.createElement('li');
             li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
             li.innerHTML = elem.userNick;
             userList.appendChild(li);
         });
-        setTimeout(getAllReservedNicks, 10000);
-    }
+    });
 }
 function checkUniqueNick(nick) {
     var res = true;
