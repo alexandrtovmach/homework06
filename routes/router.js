@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(statPath));
 
 app.all('*', function (req, res ,next) {
-    console.log('connect');
+    console.log('connect' + String(Date.now()).slice(-3));
     next();
 });
 ////user operations

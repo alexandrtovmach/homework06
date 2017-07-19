@@ -2,7 +2,6 @@
  * Created by Alexandr on 18.07.2017.
  */
 var arrNick = [];
-
 function init() {
     chat.onsubmit = function (event) {
         event.preventDefault();
@@ -10,7 +9,7 @@ function init() {
     };
     if (localStorage.length) {
         chat.classList.remove('hidden');
-        getAllReservedNicks()
+        getAllReservedNicks();
         chatPool();
     } else {
         showForm();
