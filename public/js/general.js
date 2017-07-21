@@ -1,32 +1,54 @@
 var socket = io();
+	arrReservedNicks = [];
 
 function init() {
 	//check authorize
 	if (localStorage.length) {
 		chat.classList.remove('hidden');
 	} else {
+		socket.emit('get users')
+		socket.on('get users', function (users) {
+			arrReservedNicks = users;
+		})
 		authForm.classList.remove('hidden');
 		authForm.onsubmit = function (event) {
 			event.preventDefault();
-			user = {
-				userNick: userNick.value,
-				userName: userName.value
+			if (checkNick(userNick.value)) {
+				user = {
+					userNick: userNick.value,
+					userName: userName.value
+				}
+				socket.emit('new user', user)
+				return;
+			} else {
+				alert('This nickname is reserved another user')
 			}
-			socket.emit('new user', user)
-			return;
+			
 		}
 	}
+	//offline
+	window.addEventListener("beforeunload", function () {
+		socket.emit('offline', localStorage.getItem('userNick'))
+	});
+	socket.on('offline', function (nick) {
+		if (document.getElementById(String(localStorage.getItem('userNick')))) {
+			document.getElementById(String(localStorage.getItem('userNick'))).classList.add('offline')
+		}
+	})
 	
+	
+	//typing
 	textMessage.addEventListener('keydown', function () {
 		socket.emit('typing', localStorage.getItem('userNick'))
 	})
 	textMessage.addEventListener('blur', function () {
 		socket.emit('end typing', localStorage.getItem('userNick'))
 	})
-	//typing
 	socket.on('typing', function (nick) {
-		console.log(nick)
 		document.getElementById(String(nick)).classList.add('typing')
+		if (document.getElementById(String(localStorage.getItem('userNick')))) {
+			document.getElementById(String(localStorage.getItem('userNick'))).classList.remove('offline')
+		}
 	})
 	socket.on('end typing', function (nick) {
 		document.getElementById(String(nick)).classList.remove('typing')
@@ -64,6 +86,9 @@ function init() {
 	//load users
 	socket.on('load users', function (connecters) {
 		userToHTML(connecters)
+		if (document.getElementById(String(localStorage.getItem('userNick')))) {
+			document.getElementById(String(localStorage.getItem('userNick'))).classList.remove('offline')
+		}
 	})
 	//confirm of created user
 	socket.on('created user', function () {
@@ -152,4 +177,14 @@ function parseMessage(reciver) {
         res = (String(textMessage.value[0]) === '@')? textMessage.value.split(' ').slice(1).join(' '): textMessage.value;
     }
     return res
+}
+
+function checkNick(nick) {
+	var res = true
+	arrReservedNicks.forEach(function (elem) {
+		if (elem.userNick == nick) {
+			res = false
+		}
+	})
+	return res
 }
