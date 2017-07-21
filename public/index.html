@@ -15,7 +15,7 @@
 </head>
 <body onload="init()">
 <h1>chatroom <span>BSA17</span><span>JS-06</span></h1>
-<input type="button" id="cleanUp" class="button" value="Clean Up">
+<input type="button" class="button" value="Clean Up" onclick="localStorage.clear(); location.reload()">
 
 <div class="centerContent wrap field">
     <ul id="userList"></ul>
@@ -30,6 +30,7 @@
             </label>
             <input type="submit" class="button" value="create user">
         </form>
+		
         <form id="chat" class="hidden">
             <input type="text" id="textMessage" class="field" placeholder="message..." required>
             <input type="submit" class="button" value="send">

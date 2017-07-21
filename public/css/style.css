@@ -139,3 +139,14 @@ h1 span:last-child {
 .iReciver {
     background-color: red;
 }
+.typing:after {
+	content: '...';
+	animation-name: typing;
+	animation-duration: 1s;
+	animation-direction: alternate;
+	animation-iteration-count: infinite;
+}
+@keyframes typing {
+	from {opacity: 1}
+	to {opacity: 0}
+}

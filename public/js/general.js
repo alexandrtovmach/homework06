@@ -1,88 +1,155 @@
-// /**
-//  * Created by Alexandr on 18.07.2017.
-//  */
-var arrNick = [];
-var socket;
+var socket = io();
+
 function init() {
-    socket = io.connect();
-    cleanUp.onclick = function () {
-        if (!confirm('You really wanna clean up all users and messages?')) {return}
-        localStorage.clear();
-        var xhr = new XMLHttpRequest();
-        xhr.open('get', '/cleanup');
-        xhr.send();
-        xhr.onload = function () {
-            alert('All data is removed');
-            location.reload();
-        }
-    };
-
-
-    chat.onsubmit = function (event) {
-        event.preventDefault();
-        var message = {
-            userNick: localStorage.getItem('userNick'),
-            userName: localStorage.getItem('userName'),
-            reciverNick: parseMessage(true),
-            textMessage: parseMessage()
-        };
-        socket.emit('send new message', message);
-    };
-    if (localStorage.length) {
-        chat.classList.remove('hidden');
-        getAllReservedNicks();
-        chatSocket();
-    } else {
-        authForm.onsubmit = function (event) {
-            event.preventDefault();
-            if (checkUniqueNick(userNick.value)) {
-                var user = {
-                    userNick: userNick.value,
-                    userName: userName.value
-                };
-                socket.emit('new user', user);
-                socket.on('new user', function (nicks) {
-                    localStorage.setItem('userNick', userNick.value);
-                    localStorage.setItem('userName', userName.value);
-                    authForm.classList.add('hidden');
-                    chat.classList.remove('hidden');
-                    nicks.forEach(function (elem){
-                        var li = document.createElement('li');
-                        li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
-                        li.innerHTML = elem.userNick;
-                        userList.appendChild(li);
-                    });
-                    //getAllReservedNicks();
-                    chatSocket();
-                })
-            } else {
-                alert('This nickname is reserved by another user')
+	//check authorize
+	if (localStorage.length) {
+		chat.classList.remove('hidden');
+	} else {
+		authForm.classList.remove('hidden');
+		authForm.onsubmit = function (event) {
+			event.preventDefault();
+			user = {
+				userNick: userNick.value,
+				userName: userName.value
+			}
+			socket.emit('new user', user)
+			return;
+		}
+	}
+	
+	textMessage.addEventListener('keydown', function () {
+		socket.emit('typing', localStorage.getItem('userNick'))
+	})
+	textMessage.addEventListener('blur', function () {
+		socket.emit('end typing', localStorage.getItem('userNick'))
+	})
+	//typing
+	socket.on('typing', function (nick) {
+		console.log(nick)
+		document.getElementById(String(nick)).classList.add('typing')
+	})
+	socket.on('end typing', function (nick) {
+		document.getElementById(String(nick)).classList.remove('typing')
+	})
+	
+	//send message
+	chat.onsubmit = function (event) {
+		event.preventDefault();
+		var message = {
+			textMessage: parseMessage(),
+			userNick: localStorage.getItem('userNick'),
+			reciverNick: parseMessage(true)
+		}
+		socket.emit('chat message', message)
+		return;
+	}
+	
+	//take message
+	socket.on('chat message', function (message) {
+		messToHTML(message)
+        var time = setTimeout(function scrollTimer() {
+            if (chatField.scrollTop == (chatField.scrollHeight - chatField.clientHeight)) {
+                clearTimeout(time);
+                return
             }
-        };
-        getAllReservedNicks();
-        authForm.classList.remove('hidden');
+            chatField.scrollTop += ((chatField.scrollHeight - chatField.scrollTop)/50 + 1);
+            setTimeout(scrollTimer, 20)
+        }, 1)
+	})
+	
+	//new user
+	socket.on('new user', function (user) {
+		userToHTML(user)
+	})
+	//load users
+	socket.on('load users', function (connecters) {
+		userToHTML(connecters)
+	})
+	//confirm of created user
+	socket.on('created user', function () {
+		localStorage.setItem('userNick', userNick.value);
+		localStorage.setItem('userName', userName.value);
+		authForm.classList.add('hidden');
+		chat.classList.remove('hidden');
+	})
+	//load history
+	socket.on('chat history', function (messages) {
+		messToHTML(messages);
+		chatField.scrollTop = (chatField.scrollHeight - chatField.clientHeight)
+	})
+	//confirm of sended message
+	socket.on('sended message', function () {
+		textMessage.value = null;
+	})
+	
+};
+
+function userToHTML(user) {
+	if (!!user.forEach) {
+		userList.innerHTML = null;
+		user.forEach(function (elem) {
+			var li = document.createElement('li');
+			li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
+			li.id = elem.userNick;
+			li.innerHTML = elem.userNick;
+			userList.appendChild(li);
+		})
+	} else {
+		var li = document.createElement('li');
+		li.className = (user.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
+		li.id = user.userNick;
+		li.innerHTML = user.userNick;
+		userList.appendChild(li);
+	}
+}
+
+
+function messToHTML(mess) {
+	if (!!mess.forEach) {
+		mess.forEach(function (elem) {
+			var li = document.createElement('li'),
+				span = document.createElement('span');
+			li.className = (elem.userNick == localStorage.getItem('userNick')) ? 'my' : 'other';
+			if (elem.reciverNick === localStorage.getItem('userNick')) {
+				span.style.color = 'gold';
+				li.style.color = 'gold';
+				li.style.backgroundColor = 'midnightblue';
+				span.innerHTML = elem.userNick + ' for @' + elem.reciverNick;
+			} else if (elem.reciverNick !== ''){
+				span.innerHTML = elem.userNick + ' for @' + elem.reciverNick;
+			} else {
+				span.innerHTML = elem.userNick;
+			}
+			li.appendChild(span);
+			li.innerHTML += elem.textMessage;
+			chatField.appendChild(li);
+		})
+	} else {
+		var li = document.createElement('li'),
+			span = document.createElement('span');
+		li.className = (mess.userNick == localStorage.getItem('userNick')) ? 'my' : 'other';
+		if (mess.reciverNick === localStorage.getItem('userNick')) {
+			span.style.color = 'gold';
+			li.style.color = 'gold';
+			li.style.backgroundColor = 'midnightblue';
+			span.innerHTML = mess.userNick + ' for @' + mess.reciverNick;
+		} else if (mess.reciverNick !== ''){
+			span.innerHTML = mess.userNick + ' for @' + mess.reciverNick;
+		} else {
+			span.innerHTML = mess.userNick;
+		}
+		li.appendChild(span);
+		li.innerHTML += mess.textMessage;
+		chatField.appendChild(li);
+	}
+}
+
+function parseMessage(reciver) {
+    var res;
+    if (reciver) {
+        res = (String(textMessage.value[0]) === '@')? textMessage.value.split(' ')[0].slice(1): '';
+    } else {
+        res = (String(textMessage.value[0]) === '@')? textMessage.value.split(' ').slice(1).join(' '): textMessage.value;
     }
-}
-
-
-
-function getAllReservedNicks() {
-    socket.emit('getAllUserReservedNicks');
-    socket.on('reservedNicks', function (nicks) {
-        nicks.forEach(function (elem){
-            var li = document.createElement('li');
-            li.className = (elem.userNick == localStorage.getItem('userNick'))? 'myNick': 'otherNick';
-            li.innerHTML = elem.userNick;
-            userList.appendChild(li);
-        });
-    });
-}
-function checkUniqueNick(nick) {
-    var res = true;
-    arrNick.forEach(function (elem){
-        if (String(elem.userNick) === String(nick)) {
-            res = false;
-        }
-    });
-    return res;
+    return res
 }
